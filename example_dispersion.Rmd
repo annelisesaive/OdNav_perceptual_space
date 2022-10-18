@@ -1,0 +1,37 @@
+---
+title: "PCA_plot_dispersion"
+output: html_document
+author: "ALS"
+date: "2022-10-18"
+---
+
+```{r setup, include=FALSE}
+library(Factoshiny)
+library(tidyr)
+library(readr)
+library(stringr)
+library(sp)
+setwd("~/Documents/Perceptual_Space_ALS/")
+path1 <- ("df_pca/")
+```
+
+### Plot PCA results 
+Represent all stimuli according to their 2 first dimensions to have an insight about their **dispersions**
+
+```{r message = FALSE, fig.cap = "Polygone area based on PCA two first dimensions"}
+filename <- paste(path1,"evals_su=S01-BCS_stim=face_PCA.csv",sep = "")
+pca <- read_csv(filename, show_col_types = FALSE)
+
+X <- pca[5:6]
+hpts <- chull(X)
+hpts <- c(hpts, hpts[1])
+{plot(X, cex = 0.5)
+pts <- X[hpts,]
+chull.poly <- Polygon(pts, hole=T)
+chull.area <- chull.poly@area
+lines(pts)}
+```
+
+```{r ECHO = FALSE}
+print(paste("polygone surface >> ",chull.area))
+```
