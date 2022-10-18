@@ -1,7 +1,8 @@
-# Navigating perceptual_space 
-## (ODOR, MUSIC, FACE)
-Characterizing multisensory perceptual space and its link to navigation and memory
-<br> <i> Rey et al. 2022 (psyarxiv) link coming
+# Navigating perceptual spaces
+## ODOR, MUSIC, FACE
+### Characterizing multisensory perceptual space and its link to navigation and memory
+
+<p> <i> Rey et al. 2022 (psyarxiv) </i> >> link coming
 
 RCode >> Impute missing values + PCA analyses + dispersion
 
