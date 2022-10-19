@@ -10,28 +10,63 @@ library(Factoshiny)
 library(tidyr)
 library(readr)
 library(stringr)
+library(missMDA)
 library(sp)
+library(ggforce)
 setwd("~/Documents/Perceptual_Space_ALS/")
 path1 <- ("df_pca/")
 ```
 
-### Plot PCA results 
-Represent all stimuli according to their 2 first dimensions to have an insight about their **dispersions**
+### Example and plot PCA results 
+Represent all stimuli according to their 2 first dimensions 
++ compute 2 metrics of data **dispersions** (standard deviation 2D and polygon)
+```{r}
+#Impute missing data using iterative PCA
+filename <- paste(path1,"evals_su=S01-BCS_stim=music_scaled.csv",sep = "")
+essai_pca <- read_csv(filename, show_col_types = FALSE)
+comp <- imputePCA(essai_pca[4:7], ncp = 2, scale = TRUE)
+df_new <- cbind(essai_pca[1:3], comp$completeObs)
 
-```{r message = FALSE, fig.cap = "Polygone area based on PCA two first dimensions"}
-filename <- paste(path1,"evals_su=S01-BCS_stim=face_PCA.csv",sep = "")
-pca <- read_csv(filename, show_col_types = FALSE)
+res.PCA<-PCA(df_new[3:7], quali.sup=c(1), graph = FALSE)
+pca_df <- cbind(essai_pca[1:3], res.PCA$ind)
+sum_df <- as.data.frame(res.PCA$eig) #summary(res.PCA)
+#plot.PCA(res.PCA, choix = "var", habillage = 'cos2')
+plot.PCA(res.PCA, col.ind="white", col.quali="blue")
 
-X <- pca[5:6]
-hpts <- chull(X)
+#Find the subset of points and plot the convex hull
+hpts <- chull(pca_df[4:5])
 hpts <- c(hpts, hpts[1])
-{plot(X, cex = 0.5)
-pts <- X[hpts,]
-chull.poly <- Polygon(pts, hole=T)
-chull.area <- chull.poly@area
-lines(pts)}
-```
+pts <- pca_df[hpts,]
 
-```{r ECHO = FALSE}
-print(paste("polygone surface >> ",chull.area))
+p1 <- pca_df %>%
+  ggplot(aes(x = coord.Dim.1, y = coord.Dim.2))+
+  geom_point(aes(color = stimulus_type))+
+  xlim(-4, 2)+
+  ylim(-2.5, 2.5)
+
+p1+
+  geom_polygon(data = pts,
+               aes(fill = stimulus_type, colour = stimulus_type),
+               alpha = 0.3, show.legend = FALSE)
+
+#Create polygon & compute surface
+chull.poly <- Polygon(pts[4:5], hole=F)
+chull.area <- chull.poly@area
+sum_df['surf poly'] <- chull.area #summary(res.PCA)
+print(paste("polygone surface = ",chull.area))
+
+#Compute mean dist and circle area
+radius <- mean(pca_df$dist)
+x0 <- mean(pca_df$coord.Dim.1)
+y0 <- mean(pca_df$coord.Dim.2)
+
+# Lets make some data
+p1+
+  geom_circle(aes(x0 = x0, y0 = y0, r = radius, fill = stimulus_type),
+              alpha = 0.03)+
+  coord_fixed()
+
+sum_df['surf circle'] <- pi*(radius^2)
+print(paste("circle surface = ",pi*(radius^2)))
+
 ```
