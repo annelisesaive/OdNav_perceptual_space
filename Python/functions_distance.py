@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from scipy import stats
 from itertools import product, combinations
 
 def nb_pairs(n):
@@ -13,7 +14,7 @@ def define_pairs(names):
     """
     compute all pairs of 2 stim to compare
     """
-    pairs = [(p0, p1) for p0,p1 in combinations(names,2)]
+    pairs = [(p0, p1) for p0, p1 in combinations(names,2)]
     return pairs
 
 def compute_distance(A_xy, B_xy):
@@ -34,3 +35,4 @@ def compute_all_dist(df, pairs, name_col, x_col, y_col):
         d = compute_distance(A_xy, B_xy)
         dist[i] += d
     return dist
+
