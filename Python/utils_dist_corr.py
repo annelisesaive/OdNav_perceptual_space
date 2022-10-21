@@ -36,3 +36,20 @@ def compute_all_dist(df, pairs, name_col, x_col, y_col):
         dist[i] += d
     return dist
 
+def compute_all_R(df, pairs, meth='spearman'):
+    """
+    compute all correlations btw all pairs of data
+    meth : method for computing correlations (spearman, pearson)
+    """
+    corr = np.zeros((len(pairs)))
+    for i, p in enumerate(pairs):
+        a1 = np.squeeze(df[[p[0]]].values)
+        a2 = np.squeeze(df[[p[1]]].values)
+        if meth == 'spearman':
+            r = stats.spearmanr(a1, a2)[0]
+        elif meth == 'pearson':
+            r = stats.pearsonr(a1, a2)[0]
+        else:
+            print('unknown method for correlation')
+        corr[i] += r
+    return corr 
