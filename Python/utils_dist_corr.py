@@ -17,6 +17,14 @@ def define_pairs(names):
     pairs = [(p0, p1) for p0, p1 in combinations(names,2)]
     return pairs
 
+def define_pairs_diff(names):
+    """
+    compute all pairs of stims from different category
+    """
+    all_pairs = [(p0, p1) for p0, p1 in combinations(names,2)]
+    pairs = [p for p in all_pairs if p[0][0] != p[1][0]]
+    return pairs
+    
 def compute_distance(A_xy, B_xy):
     """
     compute euclidian distance btw 2 points (A & B) using 2D coordinates

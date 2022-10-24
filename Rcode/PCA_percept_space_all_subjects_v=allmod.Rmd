@@ -1,0 +1,70 @@
+---
+title: "PCA - 3 modalities together"
+author: "ALS"
+date: "21/10/2022"
+---
+`
+```{r setup, include=FALSE, echo=FALSE}
+require("knitr")
+opts_knit$set(root.dir = "~/Documents/Perceptual_Space_ALS/")
+```
+
+```{r include = FALSE}
+library(Factoshiny)
+library(dplyr)
+library(tidyr)
+library(readr)
+library(stringr)
+library(missMDA)
+library(sp)
+#setwd("~/Documents/Perceptual_Space_ALS/")
+path1 <- ("df_pca/")
+```
+
+Compute PCA + dispersion + save data
+
+```{r include = FALSE}
+
+all_fnames <- list.files(path = path1, pattern = "ALL_ALLDATA.csv")
+
+for (i in 1:length(all_fnames)){
+
+  filename <- paste(path1, all_fnames[i], sep = "")
+  
+  data_all <- read_csv(filename, show_col_types = FALSE)
+  res.PCA<-PCA(data_all[c(2,4:7)], quali.sup=c(1), graph = TRUE)
+  
+  #plot.PCA(res.PCA, col.ind = "red",col.quali = "blue")
+  #plotellipses(res.PCA)
+  pca_df <- cbind(data_all[1:3], res.PCA$ind)
+  sum_df <- as.data.frame(res.PCA$eig) #summary(res.PCA), dimdesc(res.PCA)
+  
+  stims = c('odor','face','music')
+  
+  for (s in 1:length(stims)){
+    df_n <- pca_df %>% filter(stimulus_type == stims[s])
+    
+    #Find the subset of points and plot the convex hull
+    hpts <- chull(df_n[4:5])
+    hpts <- c(hpts, hpts[1])
+    pts <- df_n[hpts,]
+    
+    #Create polygon & compute surface
+    chull.poly <- Polygon(pts[4:5], hole=F)
+    chull.area <- chull.poly@area
+    sum_df[paste('surf poly ',stims[s])] <- chull.area #summary(res.PCA)
+    
+    #Compute centroid coordinates (dist + area calculations done in Python)
+    x0 <- mean(df_n$coord.Dim.1)
+    y0 <- mean(df_n$coord.Dim.2)
+    sum_df[paste('x0 ',stims[s])] <- x0
+    sum_df[paste('y0 ',stims[s])] <- y0
+  }
+  
+  fname2 <- str_replace(filename, "_ALLDATA", "_ALL_PCA")
+  fname3 <- str_replace(filename, "_ALLDATA", "_ALL_PCA_sum")
+  
+  write.csv(pca_df, fname2)
+  write.csv(sum_df, fname3)
+}
+```
